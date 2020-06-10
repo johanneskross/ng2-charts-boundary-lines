@@ -1,0 +1,21 @@
+{
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../dist/ng2-charts-boundary-lines",
+  "lib": {
+    "entryFile": "src/public-api.ts",
+    "umdModuleIds": {
+      "ng2-charts": "ng2-charts",
+      "chartjs-plugin-annotation": "chartjs-plugin-annotation",
+      "chartjs-plugin-dragdata": "chartjs-plugin-dragdata"
+    }
+  },
+  "whitelistedNonPeerDependencies": [
+    "chart.js",
+    "chartjs-plugin-annotation",
+    "chartjs-plugin-dragdata",
+    "chartjs-plugin-zoom",
+    "hammerjs",
+    "help",
+    "ng2-charts"
+  ]
+}
