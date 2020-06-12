@@ -16,11 +16,12 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
   @Input() width: number;
   @Input() height: number;
   @Input() maxDataPoints = 48;
-  @Input() systemTraces: ChartPoint[];
+  @Input() traces: ChartPoint[];
   @Input() lowerBaseline: ChartPoint[];
   @Input() upperBaseline: ChartPoint[];
   @Output() lowerBaselineChange = new EventEmitter();
   @Output() upperBaselineChange = new EventEmitter();
+  private rawDatasets: [Chart.ChartPoint[], Chart.ChartPoint[], Chart.ChartPoint[]];
   public lineChartData: (ChartDataSets & { dragData })[];
   public lineChartOptions: (ChartOptions & { dragData, dragDataRound, dragOptions, onDragStart, onDrag, onDragEnd });
   public lineChartLegend = false;
@@ -33,17 +34,30 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.rawDatasets = [this.traces, this.lowerBaseline, this.upperBaseline];
     this.lineChartData = [
       {
-        data: this.systemTraces, fill: 'none', borderColor: 'rgba(77,83,96,1)', backgroundColor: 'rgba(77,83,96,0.2)', label: 'Trace',
+        data: this.traces,
+        fill: 'none',
+        borderColor: 'rgba(77,83,96,1)',
+        backgroundColor: 'rgba(77,83,96,0.2)',
+        label: 'Trace',
         dragData: false
       },
       {
-        data: this.lowerBaseline, fill: 'start', borderColor: 'red', backgroundColor: 'rgba(255,0,0,0.3)', label: 'Lower Baseline',
+        data: this.lowerBaseline,
+        fill: 'start',
+        borderColor: 'red',
+        backgroundColor: 'rgba(255,0,0,0.3)',
+        label: 'Lower Baseline',
         dragData: true
       },
       {
-        data: this.upperBaseline, fill: 'end', borderColor: 'red', backgroundColor: 'rgba(255,0,0,0.3)', label: 'Upper Baseline',
+        data: this.upperBaseline,
+        fill: 'end',
+        borderColor: 'red',
+        backgroundColor: 'rgba(255,0,0,0.3)',
+        label: 'Upper Baseline',
         dragData: true
       }
     ];
@@ -52,7 +66,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
   }
 
   private updateData(from: Date = this.upperBaseline[0].x as Date, to: Date = this.upperBaseline[this.upperBaseline.length - 1].x as Date) {
-    this.lineChartData[0].data = this.filterChartPoints(this.systemTraces, from, to);
+    this.lineChartData[0].data = this.filterChartPoints(this.traces, from, to);
     this.lineChartData[1].data = this.filterChartPoints(this.lowerBaseline, from, to, AggregationStrategy.MAX);
     this.lineChartData[2].data = this.filterChartPoints(this.upperBaseline, from, to, AggregationStrategy.MIN);
   }
@@ -118,6 +132,28 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
     }
   }
 
+  private applyBaselineChange(datasetIndex, datapointIndex) {
+    const draggedDataset: ChartPoint[] = this.lineChartData[datasetIndex].data as ChartPoint[];
+    if ((datapointIndex - 1) >= 0) {
+      this.interpolateRawDataset(draggedDataset[datapointIndex - 1], draggedDataset[datapointIndex], datasetIndex);
+    }
+    if ((datapointIndex + 1) < draggedDataset.length) {
+      this.interpolateRawDataset(draggedDataset[datapointIndex], draggedDataset[datapointIndex + 1], datasetIndex);
+    }
+    this.emitBaselineChange();
+  }
+
+  private interpolateRawDataset(p0: ChartPoint, p1: ChartPoint, datasetIndex: number) {
+    const dataFromPoToP1 = this.rawDatasets[datasetIndex].filter(p => p.x >= p0.x && p.x <= p1.x);
+    const slope = ((p1.y as number) - (p0.y as number)) / dataFromPoToP1.length;
+    dataFromPoToP1.forEach((tmpChartPoint, index) => tmpChartPoint.y = (slope * index) + (p0.y as number));
+  }
+
+  private emitBaselineChange() {
+    this.lowerBaselineChange.emit(this.lowerBaseline);
+    this.upperBaselineChange.emit(this.upperBaseline);
+  }
+
   private setLineChartOptions(points: Chart.ChartPoint[]):
     (ChartOptions & { dragData, dragDataRound, dragOptions, onDragStart, onDrag, onDragEnd }) {
 
@@ -169,7 +205,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
               labelString: 'value'
             },
             ticks: {
-              beginAtZero: true
+              suggestedMin: 0
             }
           }
         ]
@@ -219,19 +255,11 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
       onDrag: (e) => {
         e.target.style.cursor = 'grabbing';
       },
-      onDragEnd: (e, datasetIndex, index, value) => {
-        console.log(value);
-        const point: ChartPoint[] = this.lineChartData[datasetIndex].data as ChartPoint[];
-        console.log(point[index]);
+      onDragEnd: (e, datasetIndex, datapointIndex) => {
+        this.applyBaselineChange(datasetIndex, datapointIndex);
         e.target.style.cursor = 'default';
-        this.emitBaselineChange();
       }
     };
-  }
-
-  private emitBaselineChange() {
-    this.lowerBaselineChange.emit(this.lowerBaseline);
-    this.upperBaselineChange.emit(this.upperBaseline);
   }
 
 }

@@ -8,12 +8,12 @@ import {ChartPoint} from 'chart.js';
 })
 export class AppComponent {
   title = 'ng2-charts-boundary-lines-demo';
-  systemTraces: ChartPoint[];
+  traces: ChartPoint[];
   lowerBaseline: ChartPoint[];
   upperBaseline: ChartPoint[];
 
   constructor() {
-    this.systemTraces = this.createFakeChartPointsForOneDay(40);
+    this.traces = this.createFakeChartPointsForOneDay(40);
     this.lowerBaseline = this.createFakeChartPointsForOneDay(10);
     this.upperBaseline = this.createFakeChartPointsForOneDay(90);
   }
