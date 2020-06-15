@@ -4,6 +4,10 @@ import {ChartDataSets, ChartOptions, ChartPoint} from 'chart.js';
 import * as pluginAnnotations from 'chartjs-plugin-annotation';
 import * as dragDataAnnotations from 'chartjs-plugin-dragdata';
 import * as zoomAnnotations from 'chartjs-plugin-zoom';
+import {FilterChartPointsService} from './filter-chart-points.service';
+import {AdaptChartPointsService} from './adapt-chart-points.service';
+import BoundaryChartDataSets, {AggregationStrategy} from './boundary-chart-datasets.model';
+
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -21,145 +25,73 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
   @Input() upperBaseline: ChartPoint[];
   @Output() lowerBaselineChange = new EventEmitter();
   @Output() upperBaselineChange = new EventEmitter();
-  private rawDatasets: [Chart.ChartPoint[], Chart.ChartPoint[], Chart.ChartPoint[]];
-  public lineChartData: (ChartDataSets & { dragData })[];
-  public lineChartOptions: (ChartOptions & { dragData, dragDataRound, dragOptions, onDragStart, onDrag, onDragEnd });
-  public lineChartLegend = false;
-  public lineChartType = 'line';
-  public lineChartPlugins = [pluginAnnotations, dragDataAnnotations, zoomAnnotations];
+  private outputDataSets: ChartDataSets[];
+  public chartDataSets: BoundaryChartDataSets[];
+  public chartOptions: (ChartOptions & { dragData, dragDataRound, dragOptions, onDragStart, onDrag, onDragEnd });
+  public chartLegend = false;
+  public chartType = 'line';
+  public chartPlugins = [pluginAnnotations, dragDataAnnotations, zoomAnnotations];
 
   @ViewChild(BaseChartDirective, {static: true}) chart: BaseChartDirective;
 
-  constructor() {
+  constructor(private filterChartPointsService: FilterChartPointsService, private adaptChartPointsService: AdaptChartPointsService) {
   }
 
   ngOnInit(): void {
-    this.rawDatasets = [this.traces, this.lowerBaseline, this.upperBaseline];
-    this.lineChartData = [
+    this.outputDataSets = [{data: this.traces}, {data: this.lowerBaseline}, {data: this.upperBaseline}];
+    this.chartDataSets = [
       {
         data: this.traces,
+        maxDataPoints: this.maxDataPoints,
+        aggregationStrategy: null,
         fill: 'none',
         borderColor: 'rgba(77,83,96,1)',
         backgroundColor: 'rgba(77,83,96,0.2)',
+        pointBackgroundColor: 'rgba(77,83,96,0.5)',
         label: 'Trace',
         dragData: false
       },
       {
         data: this.lowerBaseline,
+        maxDataPoints: this.maxDataPoints,
+        aggregationStrategy: AggregationStrategy.MAX,
         fill: 'start',
         borderColor: 'red',
         backgroundColor: 'rgba(255,0,0,0.3)',
+        pointBackgroundColor: 'rgba(255,0,0,0.5)',
         label: 'Lower Baseline',
         dragData: true
       },
       {
         data: this.upperBaseline,
+        maxDataPoints: this.maxDataPoints,
+        aggregationStrategy: AggregationStrategy.MIN,
         fill: 'end',
         borderColor: 'red',
         backgroundColor: 'rgba(255,0,0,0.3)',
+        pointBackgroundColor: 'rgba(255,0,0, 0.5)',
         label: 'Upper Baseline',
         dragData: true
       }
     ];
-    this.lineChartOptions = this.setLineChartOptions(this.upperBaseline);
+    this.chartOptions = this.setLineChartOptions(this.upperBaseline);
     this.updateData();
   }
 
   private updateData(from: Date = this.upperBaseline[0].x as Date, to: Date = this.upperBaseline[this.upperBaseline.length - 1].x as Date) {
-    this.lineChartData[0].data = this.filterChartPoints(this.traces, from, to);
-    this.lineChartData[1].data = this.filterChartPoints(this.lowerBaseline, from, to, AggregationStrategy.MAX);
-    this.lineChartData[2].data = this.filterChartPoints(this.upperBaseline, from, to, AggregationStrategy.MIN);
-  }
-
-  private filterChartPoints(chartPoints: ChartPoint[], from: Date, to: Date, strategy: AggregationStrategy = null): ChartPoint[] {
-    const chartPointsByTimeRange = this.getChartPointsByTimeRange(chartPoints, from, to);
-    return this.filterChartPointsByMaxDataPoints(chartPointsByTimeRange, strategy);
-  }
-
-  private getChartPointsByTimeRange(chartPoints: ChartPoint[], from: Date, to: Date): ChartPoint[] {
-    const timespan = to.getTime() - from.getTime();
-    const marginTime = 2 * (timespan / this.maxDataPoints);
-    const fromWithMarginTime = new Date(from.getTime() - marginTime);
-    const toWithMarginTime = new Date(to.getTime() + marginTime);
-    return chartPoints.filter((value) => ((value.x as Date) >= fromWithMarginTime && (value.x as Date) <= toWithMarginTime));
-  }
-
-  private filterChartPointsByMaxDataPoints(chartPoints: ChartPoint[], strategy: AggregationStrategy = null): ChartPoint[] {
-    const from = (chartPoints[0].x as Date).getTime();
-    const to = (chartPoints[chartPoints.length - 1].x as Date).getTime();
-    const timespan = to - from;
-    const timespanPerDataPoint = timespan / this.maxDataPoints;
-
-    const chartPointIndicesOfEachTimespan: number[] = this.getChartPointIndicesOfEachTimespan(chartPoints, timespanPerDataPoint);
-
-    const filteredChartPointsByMaxDataPoints: ChartPoint[] = [];
-    let currentValue = 0;
-    let currentIndex = 0;
-    chartPoints.forEach((chartPoint: ChartPoint, index: number) => {
-      if (chartPointIndicesOfEachTimespan.includes(index)) {
-        currentValue = chartPoint.y as number;
-        filteredChartPointsByMaxDataPoints.push(chartPoint);
-        currentIndex = filteredChartPointsByMaxDataPoints.length - 1;
-      } else {
-        currentValue = this.getAggregatedValue(currentValue, (chartPoint.y as number), strategy);
-        filteredChartPointsByMaxDataPoints[currentIndex].y = currentValue;
-      }
-    });
-    return filteredChartPointsByMaxDataPoints;
-  }
-
-  private getChartPointIndicesOfEachTimespan(chartPoints: ChartPoint[], timespan: number): number[] {
-    const chartPointIndicesOfEachTimespan = [];
-    let timeForNextDataPoint = (chartPoints[0].x as Date).getTime();
-    chartPoints.forEach((value, index) => {
-      const currentTime = (value.x as Date).getTime();
-      if (currentTime >= timeForNextDataPoint) {
-        timeForNextDataPoint = timeForNextDataPoint + timespan;
-        chartPointIndicesOfEachTimespan.push(index);
-      }
-    });
-    return chartPointIndicesOfEachTimespan;
-  }
-
-  private getAggregatedValue(last: number, current: number, strategy: AggregationStrategy) {
-    switch (strategy) {
-      case AggregationStrategy.MAX:
-        return last > current ? last : current;
-      case AggregationStrategy.MIN:
-        return last < current ? last : current;
-      default:
-        return (last + current) / 2;
-    }
+    this.filterChartPointsService.filterDataSets(this.chartDataSets, from, to, this.outputDataSets);
   }
 
   private applyBaselineChange(datasetIndex, datapointIndex) {
-    const draggedDataset: ChartPoint[] = this.lineChartData[datasetIndex].data as ChartPoint[];
-    if ((datapointIndex - 1) >= 0) {
-      this.interpolateRawDataset(draggedDataset[datapointIndex - 1], draggedDataset[datapointIndex], datasetIndex);
-    }
-    if ((datapointIndex + 1) < draggedDataset.length) {
-      this.interpolateRawDataset(draggedDataset[datapointIndex], draggedDataset[datapointIndex + 1], datasetIndex);
-    }
-    this.emitBaselineChange();
-  }
-
-  private interpolateRawDataset(p0: ChartPoint, p1: ChartPoint, datasetIndex: number) {
-    const dataFromPoToP1 = this.rawDatasets[datasetIndex].filter(p => p.x >= p0.x && p.x <= p1.x);
-    const slope = ((p1.y as number) - (p0.y as number)) / dataFromPoToP1.length;
-    dataFromPoToP1.forEach((tmpChartPoint, index) => tmpChartPoint.y = (slope * index) + (p0.y as number));
-  }
-
-  private emitBaselineChange() {
+    this.adaptChartPointsService.adaptChartPoints(this.chartDataSets, datasetIndex, datapointIndex, this.outputDataSets);
     this.lowerBaselineChange.emit(this.lowerBaseline);
     this.upperBaselineChange.emit(this.upperBaseline);
   }
 
-  private setLineChartOptions(points: Chart.ChartPoint[]):
+  private setLineChartOptions(points: ChartPoint[]):
     (ChartOptions & { dragData, dragDataRound, dragOptions, onDragStart, onDrag, onDragEnd }) {
-
     const rangeMin = points.length > 0 ? points[0].x : null;
     const rangeMax = points.length > 0 ? points[points.length - 1].x : null;
-
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -249,7 +181,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
       dragOptions: {
         showTooltip: true
       },
-      onDragStart: (e) => {
+      onDragStart: () => {
         // do nothing
       },
       onDrag: (e) => {
@@ -262,9 +194,4 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
     };
   }
 
-}
-
-export enum AggregationStrategy {
-  MAX,
-  MIN
 }
