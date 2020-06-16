@@ -74,14 +74,14 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
       }
     ];
     this.chartOptions = this.setLineChartOptions(this.upperBaseline);
-    this.filterDataSets(this.upperBaseline[0].x as Date, this.upperBaseline[this.upperBaseline.length - 1].x as Date);
+    this.excerptChartData(this.upperBaseline[0].x as Date, this.upperBaseline[this.upperBaseline.length - 1].x as Date);
   }
 
-  private filterDataSets(from: Date, to: Date) {
+  private excerptChartData(from: Date, to: Date) {
     this.excerptService.excerptChartData(this.outputDataSets, this.chartDataSets, from, to);
   }
 
-  private applyBaselineChange(datasetIndex, datapointIndex) {
+  private fitAndEmitChartDataChanges(datasetIndex, datapointIndex) {
     this.fittingService.fitOutputData(this.outputDataSets, this.chartDataSets, datasetIndex, datapointIndex);
     this.lowerBaselineChange.emit(this.lowerBaseline);
     this.upperBaselineChange.emit(this.upperBaseline);
@@ -170,7 +170,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
               const chartOptions = chart.options.scales.xAxes[0];
               const startX = chartOptions.ticks.min as number;
               const endX = chartOptions.ticks.max as number;
-              this.filterDataSets(new Date(startX), new Date(endX));
+              this.excerptChartData(new Date(startX), new Date(endX));
             }
           }
         }
@@ -187,7 +187,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
         e.target.style.cursor = 'grabbing';
       },
       onDragEnd: (e, datasetIndex, datapointIndex) => {
-        this.applyBaselineChange(datasetIndex, datapointIndex);
+        this.fitAndEmitChartDataChanges(datasetIndex, datapointIndex);
         e.target.style.cursor = 'default';
       }
     };
