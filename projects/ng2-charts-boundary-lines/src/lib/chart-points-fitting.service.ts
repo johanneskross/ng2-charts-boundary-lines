@@ -21,9 +21,9 @@ export class ChartPointsFittingService {
   }
 
   private interpolateOutputData(outputData: ChartDataSets[], p0: ChartPoint, p1: ChartPoint, datasetIndex: number): void {
-    const dataFromPoToP1 = (outputData[datasetIndex].data as ChartPoint[]).filter(p => p.x >= p0.x && p.x <= p1.x);
-    const slope = ((p1.y as number) - (p0.y as number)) / dataFromPoToP1.length;
-    dataFromPoToP1.forEach((tmpChartPoint, index) => tmpChartPoint.y = (slope * index) + (p0.y as number));
+    const dataFromP0ToP1 = (outputData[datasetIndex].data as ChartPoint[]).filter(p => p.x >= p0.x && p.x <= p1.x);
+    const slope = ((p1.y as number) - (p0.y as number)) / dataFromP0ToP1.length;
+    dataFromP0ToP1.forEach((tmpChartPoint, index) => tmpChartPoint.y = (slope * index) + (p0.y as number));
   }
 
 }
