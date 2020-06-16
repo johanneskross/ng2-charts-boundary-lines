@@ -5,58 +5,56 @@ import BoundaryChartDataSets, {AggregationStrategy} from './boundary-chart-datas
 @Injectable({
   providedIn: 'root'
 })
-export class FilterChartPointsService {
+export class ChartPointsExcerptService {
 
   constructor() {
   }
 
-  public filterDataSets(chartDataSets: BoundaryChartDataSets[], from: Date, to: Date, outputDataSets: ChartDataSets[]) {
-    chartDataSets.forEach((dataset: BoundaryChartDataSets, i: number) => {
-      dataset.data = this.filterChartPoints(outputDataSets[i].data as ChartPoint[], from, to, dataset.maxDataPoints, dataset.aggregationStrategy);
+  public excerptChartData(outputData: ChartDataSets[], chartData: BoundaryChartDataSets[], from: Date, to: Date) {
+    chartData.forEach((dataset: BoundaryChartDataSets, i: number) => {
+      dataset.data = this.excerptChartPoints(outputData[i], from, to, dataset);
     });
   }
 
-  private filterChartPoints(chartPoints: ChartPoint[], from: Date, to: Date, maxDataPoints: number, strategy: AggregationStrategy = null): ChartPoint[] {
-    const chartPointsByTimeRange = this.getChartPointsByTimeRange(chartPoints, from, to, maxDataPoints);
-    return this.filterChartPointsByMaxDataPoints(chartPointsByTimeRange, maxDataPoints, strategy);
+  private excerptChartPoints(outputData: ChartDataSets, from: Date, to: Date, chartData: BoundaryChartDataSets): ChartPoint[] {
+    const chartPointsExcerpt = this.excerptByTimeRange(outputData.data as ChartPoint[], from, to, chartData.maxDataPoints);
+    return this.excerptByMaxDataPoints(chartPointsExcerpt, chartData.maxDataPoints, chartData.aggregationStrategy);
   }
 
-  private getChartPointsByTimeRange(chartPoints: ChartPoint[], from: Date, to: Date, maxDataPoints: number): ChartPoint[] {
+  private excerptByTimeRange(chartPoints: ChartPoint[], from: Date, to: Date, maxDataPoints: number): ChartPoint[] {
     const timespan = to.getTime() - from.getTime();
-    const marginTime = 2 * (timespan / maxDataPoints);
-    const fromWithMarginTime = new Date(from.getTime() - marginTime);
-    const toWithMarginTime = new Date(to.getTime() + marginTime);
-    return chartPoints.filter((value) => ((value.x as Date) >= fromWithMarginTime && (value.x as Date) <= toWithMarginTime));
+    const margin = 2 * (timespan / maxDataPoints);
+    const fromWithMargin = new Date(from.getTime() - margin);
+    const toWithMargin = new Date(to.getTime() + margin);
+    return chartPoints.filter((value: ChartPoint) => ((value.x as Date) >= fromWithMargin && (value.x as Date) <= toWithMargin));
   }
 
-  private filterChartPointsByMaxDataPoints(chartPoints: ChartPoint[], maxDataPoints: number, strategy: AggregationStrategy = null): ChartPoint[] {
+  private excerptByMaxDataPoints(chartPoints: ChartPoint[], maxDataPoints: number, strategy: AggregationStrategy): ChartPoint[] {
     const from = (chartPoints[0].x as Date).getTime();
     const to = (chartPoints[chartPoints.length - 1].x as Date).getTime();
     const timespan = to - from;
     const timespanPerDataPoint = timespan / maxDataPoints;
-
     const chartPointIndicesOfEachTimespan: number[] = this.getChartPointIndicesOfEachTimespan(chartPoints, timespanPerDataPoint);
-
-    const filteredChartPointsByMaxDataPoints: ChartPoint[] = [];
+    const excerptByMaxDataPoints: ChartPoint[] = [];
     let currentValue = 0;
     let currentIndex = 0;
     chartPoints.forEach((chartPoint: ChartPoint, index: number) => {
       if (chartPointIndicesOfEachTimespan.includes(index)) {
         currentValue = chartPoint.y as number;
-        filteredChartPointsByMaxDataPoints.push(chartPoint);
-        currentIndex = filteredChartPointsByMaxDataPoints.length - 1;
+        excerptByMaxDataPoints.push(chartPoint);
+        currentIndex = excerptByMaxDataPoints.length - 1;
       } else {
         currentValue = this.getAggregatedValue(currentValue, (chartPoint.y as number), strategy);
-        filteredChartPointsByMaxDataPoints[currentIndex].y = currentValue;
+        excerptByMaxDataPoints[currentIndex].y = currentValue;
       }
     });
-    return filteredChartPointsByMaxDataPoints;
+    return excerptByMaxDataPoints;
   }
 
   private getChartPointIndicesOfEachTimespan(chartPoints: ChartPoint[], timespan: number): number[] {
     const chartPointIndicesOfEachTimespan = [];
     let timeForNextDataPoint = (chartPoints[0].x as Date).getTime();
-    chartPoints.forEach((value, index) => {
+    chartPoints.forEach((value: ChartPoint, index: number) => {
       const currentTime = (value.x as Date).getTime();
       if (currentTime >= timeForNextDataPoint) {
         timeForNextDataPoint = timeForNextDataPoint + timespan;

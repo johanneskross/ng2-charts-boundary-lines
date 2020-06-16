@@ -4,9 +4,9 @@ import {ChartDataSets, ChartOptions, ChartPoint} from 'chart.js';
 import * as pluginAnnotations from 'chartjs-plugin-annotation';
 import * as dragDataAnnotations from 'chartjs-plugin-dragdata';
 import * as zoomAnnotations from 'chartjs-plugin-zoom';
-import {FilterChartPointsService} from './filter-chart-points.service';
-import {AdaptChartPointsService} from './adapt-chart-points.service';
 import BoundaryChartDataSets, {AggregationStrategy} from './boundary-chart-datasets.model';
+import {ChartPointsExcerptService} from './chart-points-excerpt.service';
+import {ChartPointsFittingService} from './chart-points-fitting.service';
 
 
 @Component({
@@ -31,10 +31,9 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
   public chartLegend = false;
   public chartType = 'line';
   public chartPlugins = [pluginAnnotations, dragDataAnnotations, zoomAnnotations];
-
   @ViewChild(BaseChartDirective, {static: true}) chart: BaseChartDirective;
 
-  constructor(private filterChartPointsService: FilterChartPointsService, private adaptChartPointsService: AdaptChartPointsService) {
+  constructor(private excerptService: ChartPointsExcerptService, private fittingService: ChartPointsFittingService) {
   }
 
   ngOnInit(): void {
@@ -75,15 +74,15 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
       }
     ];
     this.chartOptions = this.setLineChartOptions(this.upperBaseline);
-    this.updateData();
+    this.filterDataSets(this.upperBaseline[0].x as Date, this.upperBaseline[this.upperBaseline.length - 1].x as Date);
   }
 
-  private updateData(from: Date = this.upperBaseline[0].x as Date, to: Date = this.upperBaseline[this.upperBaseline.length - 1].x as Date) {
-    this.filterChartPointsService.filterDataSets(this.chartDataSets, from, to, this.outputDataSets);
+  private filterDataSets(from: Date, to: Date) {
+    this.excerptService.excerptChartData(this.outputDataSets, this.chartDataSets, from, to);
   }
 
   private applyBaselineChange(datasetIndex, datapointIndex) {
-    this.adaptChartPointsService.adaptChartPoints(this.chartDataSets, datasetIndex, datapointIndex, this.outputDataSets);
+    this.fittingService.fitOutputData(this.outputDataSets, this.chartDataSets, datasetIndex, datapointIndex);
     this.lowerBaselineChange.emit(this.lowerBaseline);
     this.upperBaselineChange.emit(this.upperBaseline);
   }
@@ -171,7 +170,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
               const chartOptions = chart.options.scales.xAxes[0];
               const startX = chartOptions.ticks.min as number;
               const endX = chartOptions.ticks.max as number;
-              this.updateData(new Date(startX), new Date(endX));
+              this.filterDataSets(new Date(startX), new Date(endX));
             }
           }
         }
