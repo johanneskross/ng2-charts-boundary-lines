@@ -37,6 +37,9 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.traces || !this.lowerBaseline || !this.upperBaseline) {
+      return;
+    }
     this.outputDataSets = [{data: this.traces}, {data: this.lowerBaseline}, {data: this.upperBaseline}];
     this.chartDataSets = [
       {
@@ -136,7 +139,8 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
               labelString: 'value'
             },
             ticks: {
-              suggestedMin: 0
+              suggestedMin: 0,
+              suggestedMax: 150
             }
           }
         ]
