@@ -8,12 +8,12 @@ import {ChartPoint} from 'chart.js';
 })
 export class AppComponent {
   title = 'ng2-charts-boundary-lines-demo';
-  systemTraces: ChartPoint[];
+  traces: ChartPoint[];
   lowerBaseline: ChartPoint[];
   upperBaseline: ChartPoint[];
 
   constructor() {
-    this.systemTraces = this.createFakeChartPointsForOneDay(40);
+    this.traces = this.createFakeChartPointsForOneDay(40);
     this.lowerBaseline = this.createFakeChartPointsForOneDay(10);
     this.upperBaseline = this.createFakeChartPointsForOneDay(90);
   }
@@ -23,10 +23,18 @@ export class AppComponent {
     for (let hour = 0; hour < 24; hour++) {
       for (let minute = 0; minute < 60 ; minute = minute + 1) {
         for (let seconds = 0; seconds < 60 ; seconds = seconds + 1) {
-          chartPoints.push({x: new Date(2020, 4, 20, hour, minute, seconds, 100), y: ((Math.random() * (20 + hour)) + point)});
+          chartPoints.push({
+            x: new Date(2020, 4, 20, hour, minute, seconds, 100),
+            y: (f(((hour * 60 + minute) * 60 + seconds)) + point)
+          });
         }
       }
     }
     return chartPoints;
   }
+
+}
+
+export function f(x: number): number {
+  return Math.sin(x * 100);
 }
