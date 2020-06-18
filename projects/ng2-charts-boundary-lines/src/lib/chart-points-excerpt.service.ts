@@ -10,23 +10,27 @@ export class ChartPointsExcerptService {
   constructor() {
   }
 
-  public excerptChartData(outputData: ChartDataSets[], chartData: BoundaryChartDataSets[], from: Date, to: Date) {
+  public excerptChartData(outputData: ChartDataSets[], chartData: BoundaryChartDataSets[], from: Date, to: Date,
+                          hasMargin: boolean = true) {
     chartData.forEach((dataset: BoundaryChartDataSets, i: number) => {
-      dataset.data = this.excerptChartPoints(outputData[i], from, to, dataset);
+      dataset.data = this.excerptChartPoints(outputData[i], dataset, from, to, hasMargin);
     });
   }
 
-  private excerptChartPoints(outputData: ChartDataSets, from: Date, to: Date, chartData: BoundaryChartDataSets): ChartPoint[] {
-    const chartPointsExcerpt = this.excerptByTimeRange(outputData.data as ChartPoint[], from, to, chartData.maxDataPoints);
+  private excerptChartPoints(outputData: ChartDataSets, chartData: BoundaryChartDataSets, from: Date, to: Date,
+                             hasMargin: boolean): ChartPoint[] {
+    const chartPointsExcerpt = this.excerptByTimeRange(outputData.data as ChartPoint[], from, to, chartData.maxDataPoints, hasMargin);
     return this.excerptByMaxDataPoints(chartPointsExcerpt, chartData.maxDataPoints, chartData.aggregationStrategy);
   }
 
-  private excerptByTimeRange(chartPoints: ChartPoint[], from: Date, to: Date, maxDataPoints: number): ChartPoint[] {
-    const timespan = to.getTime() - from.getTime();
-    const margin = 2 * (timespan / maxDataPoints);
-    const fromWithMargin = new Date(from.getTime() - margin);
-    const toWithMargin = new Date(to.getTime() + margin);
-    return chartPoints.filter((value: ChartPoint) => ((value.x as Date) >= fromWithMargin && (value.x as Date) <= toWithMargin));
+  private excerptByTimeRange(chartPoints: ChartPoint[], from: Date, to: Date, maxDataPoints: number, hasMargin: boolean): ChartPoint[] {
+    if (hasMargin) {
+      const timespan = to.getTime() - from.getTime();
+      const margin = 2 * (timespan / maxDataPoints);
+      from = new Date(from.getTime() - margin);
+      to = new Date(to.getTime() + margin);
+    }
+    return chartPoints.filter((value: ChartPoint) => ((value.x as Date) >= from && (value.x as Date) <= to));
   }
 
   private excerptByMaxDataPoints(chartPoints: ChartPoint[], maxDataPoints: number, strategy: AggregationStrategy): ChartPoint[] {
@@ -41,7 +45,7 @@ export class ChartPointsExcerptService {
     chartPoints.forEach((chartPoint: ChartPoint, index: number) => {
       if (chartPointIndicesOfEachTimespan.includes(index)) {
         currentValue = chartPoint.y as number;
-        excerptByMaxDataPoints.push(chartPoint);
+        excerptByMaxDataPoints.push({x: chartPoint.x, y: chartPoint.y});
         currentIndex = excerptByMaxDataPoints.length - 1;
       } else {
         currentValue = this.getAggregatedValue(currentValue, (chartPoint.y as number), strategy);
@@ -57,7 +61,7 @@ export class ChartPointsExcerptService {
     chartPoints.forEach((value: ChartPoint, index: number) => {
       const currentTime = (value.x as Date).getTime();
       if (currentTime >= timeForNextDataPoint) {
-        timeForNextDataPoint = timeForNextDataPoint + timespan;
+        timeForNextDataPoint = currentTime + timespan;
         chartPointIndicesOfEachTimespan.push(index);
       }
     });
