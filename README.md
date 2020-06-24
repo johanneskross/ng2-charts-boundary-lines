@@ -10,7 +10,7 @@ and
 and 
 [ng2-charts](https://github.com/valor-software/ng2-charts).
 
-![Alt text](projects/ng2-charts-boundary-lines-demo/demo.gif?raw=true "Demo")
+![](https://user-images.githubusercontent.com/3582380/85585067-fb16ed00-b63f-11ea-80df-5c917fc33a22.gif)
 
 * Charts measurements and boundary lines as time series
 * Filters time series

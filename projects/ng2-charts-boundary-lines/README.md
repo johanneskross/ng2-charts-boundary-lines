@@ -10,6 +10,8 @@ and
 and 
 [ng2-charts](https://github.com/valor-software/ng2-charts).
 
+![](https://user-images.githubusercontent.com/3582380/85585067-fb16ed00-b63f-11ea-80df-5c917fc33a22.gif)
+
 * Charts measurements and boundary lines as time series
 * Filters time series
   * Filters x-values by a certain amount of maximum ticks
