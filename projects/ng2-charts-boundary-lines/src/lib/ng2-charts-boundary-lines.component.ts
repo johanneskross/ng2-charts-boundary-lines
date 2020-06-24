@@ -139,8 +139,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
               labelString: 'value'
             },
             ticks: {
-              suggestedMin: 0,
-              suggestedMax: 150
+              suggestedMin: 0
             }
           }
         ]
@@ -157,6 +156,10 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
             rangeMax: {
               x: rangeMax,
             },
+            onPanComplete: ({chart}) => {
+              const chartOptions = chart.options.scales.xAxes[0];
+              this.excerptChartData(new Date(chartOptions.ticks.min), new Date(chartOptions.ticks.max));
+            }
           },
           zoom: {
             enabled: true,
@@ -172,9 +175,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
             },
             onZoomComplete: ({chart}) => {
               const chartOptions = chart.options.scales.xAxes[0];
-              const startX = chartOptions.ticks.min as number;
-              const endX = chartOptions.ticks.max as number;
-              this.excerptChartData(new Date(startX), new Date(endX));
+              this.excerptChartData(new Date(chartOptions.ticks.min), new Date(chartOptions.ticks.max));
             }
           }
         }
