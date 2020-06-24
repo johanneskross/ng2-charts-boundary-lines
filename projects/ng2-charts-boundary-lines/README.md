@@ -1,24 +1,97 @@
-# Ng2ChartsBoundaryLines
+# ng2-charts-boundary-lines
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.1.
+Chart and edit boundary lines for Angular based on 
+[Chart.js](https://github.com/chartjs/Chart.js) 
+(with 
+[zoom plugin](https://github.com/chartjs/chartjs-plugin-zoom) 
+and 
+[dragdata plugin](https://github.com/chrispahm/chartjs-plugin-dragData)
+)
+and 
+[ng2-charts](https://github.com/valor-software/ng2-charts).
 
-## Code scaffolding
+* Charts measurements and boundary lines as time series
+* Filters time series
+  * Filters x-values by a certain amount of maximum ticks
+  * Aggregates data in between ticks according to different strategies (e.g., show maximum value in between ticks)
+* Change boundary lines
+  * Drag data points of boundary lines to change them
+  * Instantly emits changed values
+  * Interpolates data between ticks linearly
+* Zoom and pan
+  * Zoom and pan using your mouse or finger
+  * Filters data by start and end time on the x-axis to only render necessary data 
 
-Run `ng generate component component-name --project ng2-charts-boundary-lines` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project ng2-charts-boundary-lines`.
-> Note: Don't forget to add `--project ng2-charts-boundary-lines` or else it will be added to the default project in your `angular.json` file. 
+# Usage
 
-## Build
+## Installation
 
-Run `ng build ng2-charts-boundary-lines` to build the project. The build artifacts will be stored in the `dist/` directory.
+1. You can install ***ng2-charts-boundary-lines*** using npm
 
-## Publishing
+  ```bash
+  npm install ng2-charts-boundary-lines --save
+  ```
 
-After building your library with `ng build ng2-charts-boundary-lines`, go to the dist folder `cd dist/ng2-charts-boundary-lines` and run `npm publish`.
+2. You need to install `Chart.js`, ng2-charts`, and some plugins in your application as they are peer dependencies
 
-## Running unit tests
+  ```bash
+  npm install chart.js --save
+  npm install chartjs-plugin-annotation --save
+  npm install chartjs-plugin-dragdata --save
+  npm install chartjs-plugin-zoom --save
+  npm install hammerjs --save
+  npm install help --save
+  npm install ng2-charts --save
+  ```
 
-Run `ng test ng2-charts-boundary-lines` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Integration
+```typescript
+import { Ng2ChartsBoundaryLinesModule } from 'ng2-charts-boundary-lines';
 
-## Further help
+// In your app's module:
+imports: [
+   Ng2ChartsBoundaryLinesModule
+]
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+## Usage
+```html
+<ng2-charts-boundary-lines
+  [traces]="traces"              
+  [(lowerBaseline)]="lowerBaseline"
+  [(upperBaseline)]="upperBaseline"
+  [maxDataPoints]="48"           
+  [width]=1000                   
+  [height]=800>                  
+</ng2-charts-boundary-lines>
+```
+
+### Input values
+
+| Name            | Type                                                         | Description        | Required | Default   |
+| --------------- | ------------------------------------------------------------ | ------------------ | -------- | --------- |
+| `traces`        | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Actual measuements | Yes      | undefined |
+| `lowerBaseline` | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Lower boundaries   | Yes      | undefined |
+| `upperBaseline` | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Upper boundaries   | Yes      | undefined |
+| `maxDataPoints` | number                                                       | Amount of ticks    | No       | 48        |
+| `width`         | number                                                       | Width of chart     | No       | undefined |
+| `height`        | number                                                       | Height of chart    | No       | undefined |
+
+### Output values
+
+| Name                  | Type                                                         | Description      |
+| --------------------- | ------------------------------------------------------------ | ---------------- |
+| `lowerBaselineChange` | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Adapted lower boundaries |
+| `upperBaselineChange` | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Adapted upper boundaries |
+
+
+# Troubleshooting
+
+Please use [GitHub Issues](https://github.com/johanneskross/ng2-charts-boundary-lines/issues) to report bugs and feature requests.
+
+Thank you!
+
+## License
+
+The MIT License (see the [LICENSE](https://github.com/johanneskross/ng2-charts-boundary-lines/blob/master/LICENSE) file for the full text)
+
