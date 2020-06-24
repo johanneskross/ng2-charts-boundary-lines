@@ -99,7 +99,7 @@ Run `npm run build` to build the project. The build artifacts will be stored in 
 
 Run `npm run test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Start demo app
+### Start demo app
 
 Run `npm run start` and navigate to `http://localhost:4200/` to see the demo app.
 
