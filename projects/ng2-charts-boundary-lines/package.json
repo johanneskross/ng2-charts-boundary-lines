@@ -3,9 +3,26 @@
   "version": "0.0.1",
   "author": "Johannes Kross",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johanneskross/ng2-charts-boundary-lines.git"
+  },
+  "keywords": [
+    "chart.js",
+    "angular",
+    "library",
+    "chart",
+    "graph"
+  ],
+  "bugs": {
+    "url": "https://github.com/johanneskross/ng2-charts-boundary-lines/issues"
+  },
+  "homepage": "http://www.performanceguardian.net",
+  "main": "src/public_api.ts",
   "scripts": {
     "ng": "ng",
-    "build": "ng build ng2-charts-boundary-lines"
+    "build": "ng build ng2-charts-boundary-lines",
+    "test": "ng test ng2-charts-boundary-lines"
   },
   "peerDependencies": {
     "@angular/common": "^9.1.1",
