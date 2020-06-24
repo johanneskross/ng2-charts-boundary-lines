@@ -31,7 +31,7 @@ and
 ```typescript
 import { Ng2ChartsBoundaryLinesModule } from 'ng2-charts-boundary-lines';
 
-// In your App's module:
+// In your app's module:
 imports: [
    Ng2ChartsBoundaryLinesModule
 ]
@@ -45,8 +45,7 @@ imports: [
   [(upperBaseline)]="upperBaseline"
   [maxDataPoints]="48"           
   [width]=1000                   
-  [height]=800
->                  
+  [height]=800>                  
 </ng2-charts-boundary-lines>
 ```
 
@@ -70,9 +69,10 @@ imports: [
 
 # Documentation
 
-`/projects/ng2-charts-boundary-lines` is the root directory for the library  
+`/projects/ng2-charts-boundary-lines` is the root directory for the library.
 
 `/projects/ng2-charts-boundary-lines-demo` is an example app to demonstrate the library. 
+
 Run `npm run start` from this git root directory and navigate to `http://localhost:4200/` to see the demo app.
 
 
