@@ -1,27 +1,87 @@
-# Ng2ChartsBoundaryLines
+# ng2-charts-boundary-lines
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.1.
+Chart and edit boundary lines for Angular based on 
+[Chart.js](https://github.com/chartjs/Chart.js) 
+and 
+[ng2-charts](https://github.com/valor-software/ng2-charts).
 
-## Development server
+# Usage & Demo
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Installation
 
-## Code scaffolding
+1. You can install ***ng2-charts-boundary-lines*** using npm
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+  ```bash
+  npm install ng2-charts-boundary-lines --save
+  ```
 
-## Build
+2. You need to install `Chart.js`, ng2-charts`, and some plugins in your application as they are peer dependencies
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+  ```bash
+  npm install chart.js --save
+  npm install chartjs-plugin-annotation --save
+  npm install chartjs-plugin-dragdata --save
+  npm install chartjs-plugin-zoom --save
+  npm install hammerjs --save
+  npm install help --save
+  npm install ng2-charts --save
+  ```
 
-## Running unit tests
+## Integration
+```typescript
+import { Ng2ChartsBoundaryLinesModule } from 'ng2-charts-boundary-lines';
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+// In your App's module:
+imports: [
+   Ng2ChartsBoundaryLinesModule
+]
+```
 
-## Running end-to-end tests
+## Usage
+```html
+<ng2-charts-boundary-lines
+  [traces]="traces"              
+  [(lowerBaseline)]="lowerBaseline"
+  [(upperBaseline)]="upperBaseline"
+  [maxDataPoints]="48"           
+  [width]=1000                   
+  [height]=800
+>                  
+</ng2-charts-boundary-lines>
+```
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+### Input values
 
-## Further help
+| Name            | Type                                                         | Description        | Required | Default   |
+| --------------- | ------------------------------------------------------------ | ------------------ | -------- | --------- |
+| `traces`        | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Actual measuements | Yes      | undefined |
+| `lowerBaseline` | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Lower boundaries   | Yes      | undefined |
+| `upperBaseline` | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Upper boundaries   | Yes      | undefined |
+| `maxDataPoints` | number                                                       | Amount of ticks    | No       | 48        |
+| `width`         | number                                                       | Width of chart     | No       | undefined |
+| `height`        | number                                                       | Height of chart    | No       | undefined |
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+### Output values
+
+| Name                  | Type                                                         | Description      |
+| --------------------- | ------------------------------------------------------------ | ---------------- |
+| `lowerBaselineChange` | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Adapted lower boundaries |
+| `upperBaselineChange` | [`ChartPoint[]`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chart.js/index.d.ts#L252) | Adapted upper boundaries |
+
+# Documentation
+
+`/projects/ng2-charts-boundary-lines` is the root directory for the library  
+
+`/projects/ng2-charts-boundary-lines-demo` is an example app to demonstrate the library. 
+Run `npm run start` from this git root directory and navigate to `http://localhost:4200/` to see the demo app.
+
+
+## Troubleshooting
+
+Please use [GitHub Issues](https://github.com/johanneskross/ng2-charts-boundary-lines/issues) to report bugs and feature requests.
+
+Thank you!
+
+### License
+
+The MIT License (see the [LICENSE](https://github.com/johanneskross/ng2-charts-boundary-lines/blob/master/LICENSE) file for the full text)
