@@ -14,7 +14,7 @@ export class AppComponent {
 
   constructor() {
     this.traces = this.createFakeChartPointsForOneDay(40);
-    this.lowerBaseline = this.createFakeChartPointsForOneDay(10);
+    this.lowerBaseline = this.createFakeChartPointsForOneDay(30);
     this.upperBaseline = this.createFakeChartPointsForOneDay(90);
   }
 
