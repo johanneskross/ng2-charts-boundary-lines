@@ -7,6 +7,8 @@ import * as zoomAnnotations from 'chartjs-plugin-zoom';
 import BoundaryChartDataSets, {AggregationStrategy} from './boundary-chart-datasets.model';
 import {ChartPointsExcerptService} from './chart-points-excerpt.service';
 import {ChartPointsFittingService} from './chart-points-fitting.service';
+import {AsyncSubject, BehaviorSubject, Subject} from 'rxjs';
+import {take, takeUntil} from 'rxjs/operators';
 
 
 @Component({
@@ -31,6 +33,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
   public chartLegend = false;
   public chartType = 'line';
   public chartPlugins = [pluginAnnotations, dragDataAnnotations, zoomAnnotations];
+  private isDraggingSubject = new BehaviorSubject<boolean>(false);
   @ViewChild(BaseChartDirective, {static: true}) chart: BaseChartDirective;
 
   constructor(private excerptService: ChartPointsExcerptService, private fittingService: ChartPointsFittingService) {
@@ -50,6 +53,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
         borderColor: 'rgba(77,83,96,1)',
         backgroundColor: 'rgba(77,83,96,0.2)',
         pointBackgroundColor: 'rgba(77,83,96,0.5)',
+        pointRadius: undefined,
         label: 'Trace',
         dragData: false
       },
@@ -61,6 +65,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
         borderColor: 'red',
         backgroundColor: 'rgba(255,0,0,0.3)',
         pointBackgroundColor: 'rgba(255,0,0,0.5)',
+        pointRadius: 5,
         label: 'Lower Baseline',
         dragData: true
       },
@@ -72,6 +77,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
         borderColor: 'red',
         backgroundColor: 'rgba(255,0,0,0.3)',
         pointBackgroundColor: 'rgba(255,0,0, 0.5)',
+        pointRadius: 5,
         label: 'Upper Baseline',
         dragData: true
       }
@@ -81,7 +87,17 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
   }
 
   private excerptChartData(from: Date, to: Date) {
-    this.excerptService.excerptChartData(this.outputDataSets, this.chartDataSets, from, to);
+    // When a data point is dragged in parallel, we wait for it to finish and afterwards excerpt chart data
+    const unsubscribe = new Subject();
+    this.isDraggingSubject
+      .pipe(takeUntil(unsubscribe))
+      .subscribe((isDraggingDataPoint: boolean) => {
+        if (!isDraggingDataPoint) {
+          this.excerptService.excerptChartData(this.outputDataSets, this.chartDataSets, from, to);
+          unsubscribe.next();
+          unsubscribe.complete();
+        }
+      });
   }
 
   private fitAndEmitChartDataChanges(datasetIndex, datapointIndex) {
@@ -99,7 +115,7 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
       maintainAspectRatio: false,
       elements: {
         point: {
-          radius: 5
+          radius: undefined
         }
       },
       scales: {
@@ -144,12 +160,29 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
           }
         ]
       },
+      dragData: true,
+      dragDataRound: 1,
+      dragOptions: {
+        showTooltip: true
+      },
+      onDragStart: () => {
+        this.isDraggingSubject.next(true);
+      },
+      onDrag: (e) => {
+        e.target.style.cursor = 'grabbing';
+      },
+      onDragEnd: (e, datasetIndex, datapointIndex, value) => {
+        this.fitAndEmitChartDataChanges(datasetIndex, datapointIndex);
+        e.target.style.cursor = 'default';
+        this.isDraggingSubject.next(false);
+      },
       plugins: {
         zoom: {
           pan: {
             enabled: true,
             mode: 'x',
             speed: 0.5,
+            threshold: 110,
             rangeMin: {
               x: rangeMin,
             },
@@ -180,21 +213,6 @@ export class Ng2ChartsBoundaryLinesComponent implements OnInit {
           }
         }
       },
-      dragData: true,
-      dragDataRound: 1,
-      dragOptions: {
-        showTooltip: true
-      },
-      onDragStart: () => {
-        // do nothing
-      },
-      onDrag: (e) => {
-        e.target.style.cursor = 'grabbing';
-      },
-      onDragEnd: (e, datasetIndex, datapointIndex) => {
-        this.fitAndEmitChartDataChanges(datasetIndex, datapointIndex);
-        e.target.style.cursor = 'default';
-      }
     };
   }
 
