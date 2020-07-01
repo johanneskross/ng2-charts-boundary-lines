@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/johanneskross/ng2-charts-boundary-lines.git"
+    "url": "git+https://github.com/perguard/ng2-charts-boundary-lines.git"
   },
   "keywords": [
     "chart.js",
@@ -15,7 +15,7 @@
     "graph"
   ],
   "bugs": {
-    "url": "https://github.com/johanneskross/ng2-charts-boundary-lines/issues"
+    "url": "https://github.com/perguard/ng2-charts-boundary-lines/issues"
   },
   "homepage": "http://www.performanceguardian.net",
   "main": "src/public_api.ts",
