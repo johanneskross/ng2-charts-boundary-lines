@@ -31,7 +31,7 @@ and
 1. You can install ***ng2-charts-boundary-lines*** using npm
 
   ```bash
-  npm install ng2-charts-boundary-lines --save
+  npm install @perguard/ng2-charts-boundary-lines --save
   ```
 
 2. You need to install `Chart.js`, ng2-charts`, and some plugins in your application as they are peer dependencies
