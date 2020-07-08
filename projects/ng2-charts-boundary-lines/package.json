@@ -1,11 +1,11 @@
 {
-  "name": "ng2-charts-boundary-lines",
+  "name": "@perguard/ng2-charts-boundary-lines",
   "version": "0.0.1",
   "author": "Johannes Kross",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/perguard/ng2-charts-boundary-lines.git"
+    "url": "git://github.com/perguard/ng2-charts-boundary-lines.git"
   },
   "keywords": [
     "chart.js",

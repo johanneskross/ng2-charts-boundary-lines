@@ -7,8 +7,8 @@ import * as zoomAnnotations from 'chartjs-plugin-zoom';
 import BoundaryChartDataSets, {AggregationStrategy} from './boundary-chart-datasets.model';
 import {ChartPointsExcerptService} from './chart-points-excerpt.service';
 import {ChartPointsFittingService} from './chart-points-fitting.service';
-import {AsyncSubject, BehaviorSubject, Subject} from 'rxjs';
-import {take, takeUntil} from 'rxjs/operators';
+import {BehaviorSubject, Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 
 @Component({
